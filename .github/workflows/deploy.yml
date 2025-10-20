@@ -7,31 +7,31 @@ on:
 
 jobs:
   build-and-deploy:
+    # Use Node.js 20, which is modern and stable
     runs-on: ubuntu-latest
     
+    # Permissions are correct and necessary for deployment
     permissions:
       contents: write # Needed to push the built code to the gh-pages branch
       pages: write   # Allow deployment to GitHub Pages
       id-token: write # Required for deployment
 
     steps:
-      - name: Checkout 🛎️
+      - name: Checkout Repository 🛎️
         uses: actions/checkout@v4
       
       - name: Set up Node.js 🛠️
         uses: actions/setup-node@v4
         with:
           node-version: 20 # Use a current LTS version
+          cache: 'npm' # Add caching to speed up installs
 
-      - name: Install dependencies and Build 🏗️
-        run: |
-          npm install
-          npm run build # This command creates your production files in the /dist folder
+      - name: Install dependencies 📥
+        # Only install here. The build step is now handled by the 'deploy' script.
+        run: npm install
 
-      - name: Deploy to GitHub Pages 🚀
-        uses: peaceiris/actions-gh-pages@v4
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          # 🚨 CRITICAL: This is where you specify the built directory
-          publish_dir: ./dist 
-          # Ensure you are using the correct folder name (dist or build)
+      - name: Deploy to GitHub Pages via gh-pages script 🚀
+        # This one command runs:
+        # 1. 'predeploy' (which is 'npm run build' - now fixed to 'npx vite build')
+        # 2. 'deploy' (which is 'gh-pages -d dist')
+        run: npm run deploy
